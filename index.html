@@ -3,16 +3,56 @@
     <title>Huffman coding demo</title>
     <script src="js/jquery-3.3.1.min.js"></script>
     <script>
+      var sortCounts = function(a, b){
+        return b.count - a.count;
+      };
+
+      var getNodeLengths = function(node, height){
+        if(node.symbol){
+          return [node.symbol + ": " + height];
+        }
+        else{
+          var out = getNodeLengths(node.children[0], height+1).concat(getNodeLengths(node.children[1], height+1));
+          return out;
+        }
+      }
+
+      var getTreeLengths = function(tree){
+        return tree.reduce(function (array, value){
+          return array.concat(getNodeLengths(value, 1));
+        }, []);
+      }
+
+      var buildHuffmanTree = function(counts){
+        while(counts.length > 2){
+          counts = counts.sort(sortCounts);
+          var children = [];
+          children.push(counts.pop());
+          children.push(counts.pop());
+          var totalCount = children[0].count + children[1].count;
+          var newCount = new function(){
+            this.children = children;
+            this.count = totalCount;
+            this.symbol = null;
+          }
+          counts.push(newCount);
+        }
+        return counts;
+      };
+
       var updateCodes = function(){
         var counts = $("#counts").val().split("\n").map(x => x.split(": "))
           .map(x => new function(){
-            this.symbol=x[0];
-            this.count=x[1];
+            this.symbol = x[0];
+            this.count = parseInt(x[1]);
           });
 
-        var sortedCounts = counts.sort(function(a, b) { return b.count - a.count});
+        //var sortedCounts = counts.sort(sortCounts);
+        var huffmanTree = buildHuffmanTree(counts);
+        var codeLengths = getTreeLengths(huffmanTree);
         $("#codes").val(
-          sortedCounts.map(x => x.symbol + "=" + x.count).join("\n")
+          //sortedCounts.map(x => x.symbol + "=" + x.count).join("\n")
+          codeLengths.join("\n")
         );
       };
 
