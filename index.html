@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <title>Huffman coding demo</title>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script>
+      var updateCodes = function(){
+        var counts = $("#counts").val().split("\n").map(x => x.split(": "))
+          .map(x => new function(){
+            this.symbol=x[0];
+            this.count=x[1];
+          });
+
+        var sortedCounts = counts.sort(function(a, b) { return b.count - a.count});
+        $("#codes").val(
+          sortedCounts.map(x => x.symbol + "=" + x.count).join("\n")
+        );
+      };
+
+      var calculateCounts = function(numbers){
+        var counts = []
+
+        numbers.forEach(function(number){
+          if(!counts[number]){
+            counts[number] = 0;
+          }
+
+          counts[number]++;
+        });
+
+        return counts.map(function (value, index){
+          return index + ": " + value;
+        }).filter(n => true);
+      };
+
+      var updateCounts = function(){
+        $("#counts").val(
+          calculateCounts($("#numbers").val().split(",")).join("\n")
+        );
+        updateCodes();
+      };
+
+      var charToNumber = function(char){
+        return char.charCodeAt(0);
+      };
+
+      var updateNumbers = function(){
+        var plaintext = $("#plaintext").val();
+        $("#numbers").val(
+          plaintext.split("").map(x => charToNumber(x)).join(",")
+        );
+        updateCounts();
+      };
+
+      $(function() {
+        $("#plaintext").on("input change keyup", updateNumbers);
+        $("#numbers").on("input change keyup", updateCounts);
+        $("#counts").on("input change keyup", updateCodes);
+        updateNumbers();
+      });
+    </script>
+  </head>
+  <body>
+    <div>
+      Plaintext<br />
+      <textarea id="plaintext" cols=50 rows=5>I went to an Ivy League school, I'm very highly educated. I know words, I had the best words. I have - but there's no better word than stupid.</textarea>
+    </div>
+    <div>
+      Plaintext as numbers<br />
+      <textarea id="numbers" cols=50, rows=10></textarea>
+    </div>
+    <div>
+      Frequencies of each number<br />
+      <textarea id="counts" cols=20, rows=30></textarea>
+    </div>
+    <div>
+      Huffman code lengths<br />
+      <textarea id="codes" cols=20, rows=30></textarea>
+    </div>
+  </body>
+</html>
